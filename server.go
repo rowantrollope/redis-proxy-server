@@ -280,7 +280,7 @@ func (s *Server) createListenerForRedisServerID(redisServerID string) net.Listen
 	var listener net.Listener
 	var err error
 	for port := s.basePort; port < 65535; port++ {
-		address := "127.0.0.1:" + strconv.Itoa(port)
+		address := "0.0.0.0:" + strconv.Itoa(port)
 		listener, err = net.Listen("tcp", address)
 		if err == nil {
 			log.Printf("Allocated port %d for redisServerID %s", port, redisServerID)
