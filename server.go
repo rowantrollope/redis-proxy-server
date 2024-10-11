@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"sync"
 	"time"
+	"cmp"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/websocket"
@@ -41,13 +42,12 @@ type Server struct {
 
 // NewServer initializes a new Server instance
 func NewServer(disconnectMethod ClientDisconnectMethod) *Server {
-	port := 8080 // Default port
+	port := 8081 // Default port
 	if envPort := os.Getenv("PORT"); envPort != "" {
 		if parsedPort, err := strconv.Atoi(envPort); err == nil {
 			port = parsedPort
 			log.Printf("Using port %d from environment variable", port)
 		} else {
-			port = 8080
 			log.Printf("Invalid PORT environment variable, using default port %d", port)
 		}
 	} else {
@@ -87,9 +87,11 @@ func (s *Server) Start() {
 	// After a timeout reconnection checks
 	go s.checkAgentReconnections()
 
+	port := cmp.Or(os.Getenv("PORT"), "3000")
+
 	// Start the HTTP server with the handler
 	log.Printf("Server listening on :%d for agents and API requests", s.port)
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", s.port), handler); err != nil {
+	if err := http.ListenAndServe(":" + port, handler); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 
