@@ -76,6 +76,7 @@ func (s *Server) Start() {
 	// Register your handlers
 	mux.HandleFunc("/agent", s.handleAgentConnection)
 	mux.HandleFunc("/servers", s.handleGetServers)
+	mux.HandleFunc("/healthz", s.handleHealthCheck)
 	mux.HandleFunc("/stats", s.handleGetStats)
 	mux.HandleFunc("/connect", s.handleConnectToRedisServer)
 	mux.HandleFunc("/disconnect", s.handleDisconnectFromRedisServer)
@@ -979,6 +980,9 @@ func (s *Server) getRedisServerIDsForAgent(agentID string) ([]string, error) {
 func (s *Server) getAgentIDForRedisServerID(redisServerID string) (string, error) {
 	key := "redisServerIDToAgentID:" + redisServerID
 	return s.rdb.Get(s.ctx, key).Result()
+}
+func (s *Server) handleHealthCheck(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }
 
 // Handle retrieval of servers associated with an accountID
