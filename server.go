@@ -10,6 +10,7 @@ import (
 	"math/big"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -40,12 +41,22 @@ type Server struct {
 
 // NewServer initializes a new Server instance
 func NewServer(disconnectMethod ClientDisconnectMethod) *Server {
+	port := 8080 // Default port
+	if envPort, exists := os.LookupEnv("PORT"); exists {
+		if parsedPort, err := strconv.Atoi(envPort); err == nil {
+			port = parsedPort
+		} else {
+			port = 8080
+			log.Printf("Invalid PORT environment variable, using default port %d", port)
+		}
+	}
+	log.Printf("Using port %d", port)
 	return &Server{
 		agentUpgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool { return true },
 		},
 		basePort:                 6400,
-		port:                     8080,
+		port:                     port,
 		ctx:                      context.Background(),
 		listenerPerRedisServerID: make(map[string]net.Listener),
 		clientDisconnectMethod:   disconnectMethod,
