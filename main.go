@@ -18,7 +18,7 @@ func main() {
         log.Println("No .env file found or error loading .env file, proceeding to use system environment variables")
     }
 
-    server := NewServer(DISCONNECT_NONE, upgrader)
+    server := NewServer(DISCONNECT_NONE)
 
     // Read Redis configuration from environment variables
     redisAddr := os.Getenv("REDIS_ADDRESS")
