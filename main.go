@@ -11,14 +11,14 @@ import (
 func main() {
     // Configure the logger to include timestamps and file line numbers
     log.SetFlags(log.LstdFlags | log.Lshortfile)
-
-    server := NewServer(DISCONNECT_NONE)
-
+    
     // Load environment variables from .env file
     err := godotenv.Load()
     if err != nil {
         log.Println("No .env file found or error loading .env file, proceeding to use system environment variables")
     }
+    
+    server := NewServer(DISCONNECT_NONE)
 
     // Read Redis configuration from environment variables
     redisAddr := os.Getenv("REDIS_ADDRESS")

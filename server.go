@@ -42,15 +42,18 @@ type Server struct {
 // NewServer initializes a new Server instance
 func NewServer(disconnectMethod ClientDisconnectMethod) *Server {
 	port := 8080 // Default port
-	if envPort, exists := os.LookupEnv("PORT"); exists {
+	if envPort := os.Getenv("PORT"); envPort != "" {
 		if parsedPort, err := strconv.Atoi(envPort); err == nil {
 			port = parsedPort
+			log.Printf("Using port %d from environment variable", port)
 		} else {
 			port = 8080
 			log.Printf("Invalid PORT environment variable, using default port %d", port)
 		}
+	} else {
+		log.Printf("No Environment Variable for port")
 	}
-	log.Printf("Using port %d", port)
+
 	return &Server{
 		agentUpgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool { return true },
