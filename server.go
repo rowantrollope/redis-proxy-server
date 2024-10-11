@@ -384,9 +384,20 @@ func (s *Server) handleActivationRequest(agentID string, controlMsg map[string]i
 		return fmt.Errorf("activation request message missing 'redis_server_uuid' field")
 	}
 
-	// First Store the association of agentID and redisServerID
-	// TODO: Should we do this under a separate location?
-	err := s.associateAgentWithRedisServerID(agentID, redisServerID)
+	// Check if the redisServerID is already associated with another agent
+	existingAgentID, err := s.getAgentIDForRedisServerID(redisServerID)
+	if err == nil && existingAgentID != agentID {
+		// Remove the redisServerID from the old agent
+		log.Printf("Removing redisServerID %s from old agent %s", redisServerID, existingAgentID)
+		err = s.removeRedisServerIDFromAgent(existingAgentID, redisServerID)
+		if err != nil {
+			log.Printf("Error removing redisServerID %s from old agent %s: %v", redisServerID, existingAgentID, err)
+			return err
+		}
+	}
+
+	// Associate the agentID with the redisServerID in Redis
+	err = s.associateAgentWithRedisServerID(agentID, redisServerID)
 	if err != nil {
 		log.Printf("Error associating agent with redisServerID %s: %v", redisServerID, err)
 		return err
@@ -1148,4 +1159,20 @@ func (s *Server) handleAgentDisconnect(agentID string) {
 		}
 		log.Printf("Set status of redis_server_id %s to 'unreachable'", redisServerID)
 	}
+}
+
+func (s *Server) removeRedisServerIDFromAgent(agentID, redisServerID string) error {
+	// Remove the redisServerID from the agent's set
+	err := s.rdb.SRem(s.ctx, "agentIDToRedisServerIDs:"+agentID, redisServerID).Err()
+	if err != nil {
+		return fmt.Errorf("error removing redisServerID from agentIDToRedisServerIDs: %v", err)
+	}
+
+	// Remove the reverse mapping
+	err = s.rdb.Del(s.ctx, "redisServerIDToAgentID:"+redisServerID).Err()
+	if err != nil {
+		return fmt.Errorf("error deleting redisServerIDToAgentID mapping: %v", err)
+	}
+
+	return nil
 }
