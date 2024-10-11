@@ -1,6 +1,6 @@
 module github.com/rowantrollope/redis-proxy-server
 
-go 1.23.1
+go 1.23.0
 
 require (
 	github.com/go-redis/redis/v8 v8.11.5
