@@ -314,7 +314,7 @@ func (s *Server) handleRedisServerHeartbeat(controlMsg map[string]interface{}, a
 	if !ok {
 		return fmt.Errorf("control message missing 'redis_server_id' field")
 	}
-	log.Printf("Received heartbeat for redisServerID: %s", redisServerID)
+
 	// only update and store heartbeat data if the server is claimed by an agent
 	_, err := s.getAgentIDForRedisServerID(redisServerID)
 	if err != nil {
@@ -769,7 +769,7 @@ func (s *Server) handleClient(clientConn net.Conn, redisServerID string) {
 			ClientID: client.ID,
 			Data:     data,
 		}
-
+		log.Printf("Sending message to agent %s, %s", agent.agentID, data)
 		// Send the message to the agent using SendMessage()
 		if err := agent.SendMessage(message); err != nil {
 			log.Printf("Error sending message to agent %s: %v", agent.agentID, err)
