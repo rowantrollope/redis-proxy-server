@@ -314,7 +314,7 @@ func (s *Server) handleRedisServerHeartbeat(controlMsg map[string]interface{}, a
 	if !ok {
 		return fmt.Errorf("control message missing 'redis_server_id' field")
 	}
-
+	log.Printf("Received heartbeat for redisServerID: %s", redisServerID)
 	// only update and store heartbeat data if the server is claimed by an agent
 	_, err := s.getAgentIDForRedisServerID(redisServerID)
 	if err != nil {
@@ -612,14 +612,16 @@ func (s *Server) sendControlMessage(agentID string, controlData map[string]inter
 // handleConnectToRedisServer handles the API request to connect to an agent /Connect
 func (s *Server) handleConnectToRedisServer(w http.ResponseWriter, r *http.Request) {
 	redisServerID := r.URL.Query().Get("redis_server_id")
-	log.Printf("Received /connect request for redis_server_id: %s", redisServerID)
 	if redisServerID == "" {
 		http.Error(w, "redis_server_id is required", http.StatusBadRequest)
 		return
 	}
 
+	log.Printf("Received /connect request for redis_server_id: %s", redisServerID)
+
 	agentID, err := s.getAgentIDForRedisServerID(redisServerID)
 
+	log.Printf("redis_server_id: %s maps to agentID: %s", redisServerID, agentID)
 	if err != nil {
 		log.Printf("No agent found for redis_server_id %s", redisServerID)
 		http.Error(w, "Agent not found for the provided redis_server_id", http.StatusNotFound)
@@ -640,6 +642,7 @@ func (s *Server) handleConnectToRedisServer(w http.ResponseWriter, r *http.Reque
 	s.listenerPerRedisServerIDMutex.RUnlock()
 
 	if !exists {
+		log.Printf("No existing listener found for redisServerID: %s - creating new listener", redisServerID)
 		// Create a new listener for the redisServerID
 		listener = s.createListenerForRedisServerID(redisServerID)
 		if listener == nil {
@@ -1030,6 +1033,7 @@ func (s *Server) handleGetServers(w http.ResponseWriter, r *http.Request) {
 
 // Handle retrieval of servers associated with a databaseID
 func (s *Server) handleGetStats(w http.ResponseWriter, r *http.Request) {
+	log.Println("Received /stats request for redisServerId: " + r.URL.Query().Get("id"))
 	redisServerId := r.URL.Query().Get("id")
 	if redisServerId == "" {
 		http.Error(w, "Missing redisServerId parameter", http.StatusBadRequest)
