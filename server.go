@@ -59,7 +59,7 @@ func NewServer(disconnectMethod ClientDisconnectMethod) *Server {
 		agentUpgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool { return true },
 		},
-		basePort:                 6400,
+		basePort:                 50000,
 		port:                     port,
 		ctx:                      context.Background(),
 		listenerPerRedisServerID: make(map[string]net.Listener),
