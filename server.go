@@ -340,12 +340,23 @@ func (s *Server) handleRedisServerHeartbeat(controlMsg map[string]interface{}, a
 		return err
 	}
 
+	// Extract and flatten system_stats
+	systemStats, ok := controlMsg["system_stats"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("control message missing 'system_stats' field")
+	}
+
 	// Flatten the stats map to string fields
 	flatStats := make(map[string]interface{})
 	for k, v := range stats {
 		flatStats[k] = fmt.Sprint(v)
 	}
 
+	// Flatten the system_stats map to string fields
+	for k, v := range systemStats {
+		flatStats[k] = fmt.Sprint(v)
+	}
+	
 	if status == "RUNNING" {
 		// Add status and timestamp to the stats
 		flatStats["status"] = status
@@ -469,7 +480,7 @@ func (s *Server) handleActivationRequest(agentID string, controlMsg map[string]i
 			activationCode, err := s.getActivationCode(redisServerID)
 
 			if err == nil {
-				responseData := map[string]string{"activation_code": activationCode}
+				responseData := map[string]string{"state": string(ActivationStatePending), "activation_code": activationCode}
 				return s.sendActivationResponse(agentID, requestID, responseData)
 			} else {
 				return fmt.Errorf("error retrieving activation code: %v", err)
