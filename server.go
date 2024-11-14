@@ -487,11 +487,11 @@ func (s *Server) handleActivationRequest(agentID string, controlMsg map[string]i
 			}
 
 		case string(ActivationStateActivated):
-			responseData := map[string]bool{"activated": true}
+			responseData := map[string]string{"state": string(ActivationStateActivated)}
 			return s.sendActivationResponse(agentID, requestID, responseData)
 
 		case string(ActivationStateDeactivated):
-			responseData := map[string]bool{"activated": false}
+			responseData := map[string]string{"state": string(ActivationStateDeactivated)}
 			return s.sendActivationResponse(agentID, requestID, responseData)
 
 		default:
