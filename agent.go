@@ -1,13 +1,13 @@
 package main
 
 import (
+	"encoding/binary"
+	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"sync"
 	"time"
-    "encoding/json"
-	"encoding/binary"
-	"fmt"
-	"io"
 
 	"github.com/gorilla/websocket"
 )
@@ -116,9 +116,9 @@ func (agent *Agent) readPump() {
 	}
 }
 
-func (agent *Agent) unregisterClientByID(clientID uint64) {
-	agent.unregister <- &Client{ID: clientID}
-}
+// func (agent *Agent) unregisterClientByID(clientID uint64) {
+// 	agent.unregister <- &Client{ID: clientID}
+// }
 
 func (agent *Agent) handleControlMessage(data []byte) error {
 	// Parse the JSON data

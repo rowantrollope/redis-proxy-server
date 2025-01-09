@@ -82,6 +82,7 @@ func (s *Server) Start() {
 	mux.HandleFunc("/disconnect", s.handleDisconnectFromRedisServer)
 	mux.HandleFunc("/activation/claim", s.handleActivationClaim)
 	mux.HandleFunc("/activation/deactivate", s.handleDeactivateRedisServer)
+	mux.HandleFunc("/api/v1/endpoint", s.handleNewEndpoint)
 
 	// Wrap the mux with the CORS middleware
 	handler := enableCors(mux)
@@ -356,7 +357,7 @@ func (s *Server) handleRedisServerHeartbeat(controlMsg map[string]interface{}, a
 	for k, v := range systemStats {
 		flatStats[k] = fmt.Sprint(v)
 	}
-	
+
 	if status == "RUNNING" {
 		// Add status and timestamp to the stats
 		flatStats["status"] = status
@@ -1211,4 +1212,13 @@ func (s *Server) removeRedisServerIDFromAgent(agentID, redisServerID string) err
 	}
 
 	return nil
+}
+
+func (s *Server) handleNewEndpoint(w http.ResponseWriter, r *http.Request) {
+	// TODO: Implement the new endpoint logic
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "not implemented",
+	})
 }
